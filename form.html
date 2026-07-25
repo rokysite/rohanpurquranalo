@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>আবেদন ফরম</title>
+  <style>
+    body {
+      font-family: "Siyam Rupali", Arial, sans-serif;
+      background: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    .form-container {
+      width: 800px;
+      margin: auto;
+      border: 2px solid #000;
+      padding: 30px;
+      position: relative;
+    }
+    .logo {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 100px;
+    }
+    .header {
+      text-align: center;
+      line-height: 1.6;
+    }
+    .title-box {
+      border: 2px solid black;
+      display: inline-block;
+      padding: 5px 20px;
+      font-size: 22px;
+      font-weight: bold;
+      margin: 5px auto 10px auto;
+      text-align: center;
+      display: block;
+    }
+    .date-box {
+      text-align: right;
+      margin-right: 40px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    .date-box input {
+      border: 1px solid #aaa;
+      padding: 3px 6px;
+      font-size: 14px;
+    }
+    .photo-box {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 150px;
+      height: 170px;
+      border: 2px solid #999;
+      text-align: center;
+      font-size: 14px;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .photo-box img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      display: none;
+    }
+    .photo-box span {
+      display: block;
+      background: #f0f0f0;
+      padding: 5px;
+      font-weight: bold;
+    }
+    .form-group {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+    }
+    .form-group label {
+      width: 250px;
+      font-weight: bold;
+    }
+    .form-group input {
+      flex: 1;
+      padding: 6px;
+      border: 1px solid #aaa;
+      background: #e8ffff;
+      border-radius: 5px;
+    }
+    .subject {
+      margin-top: 40px;
+      margin-bottom: 20px;
+      line-height: 1.8;
+    }
+    .signature-wrapper {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 60px;
+      padding: 0 50px;
+    }
+    .signature-box {
+      text-align: center;
+      position: relative;
+    }
+    .signature-box canvas {
+      width: 250px;
+      height: 60px;
+      border-bottom: 2px solid #000;
+      cursor: crosshair;
+    }
+    .signature-label {
+      font-weight: bold;
+      margin-top: 5px;
+    }
+    .buttons {
+      margin-top: 30px;
+      text-align: center;
+    }
+    .buttons button {
+      padding: 8px 20px;
+      border: 1px solid #333;
+      background: #eee;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    @media print {
+      .buttons, #photo-upload {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <form class="form-container" id="applicationForm">
+    <!-- লোগো -->
+    <img src="logo.png" alt="Logo" class="logo">
+
+    <!-- হেডার -->
+    <div class="header">
+      <h2>রহনপুর কুরআনের আলো</h2>
+      <p>ডাকঘর- রহনপুর, উপজেলা- গোমস্তাপুর,<br>
+      জেলা- চাঁপাইনবাবগঞ্জ<br>
+      স্থাপিত ২০১৯ খ্রিঃ</p>
+    </div>
+
+    <!-- টাইটেল -->
+    <div class="title-box">আবেদন ফরম</div>
+    <div class="date-box">
+      তারিখঃ <input type="date" name="date" required>
+    </div>
+
+    <!-- ছবি -->
+    <label for="photo-upload" class="photo-box">
+      <img id="photo-preview" alt="ছবি">
+      <span>ছবি</span>
+    </label>
+    <input type="file" id="photo-upload" accept="image/*" style="display:none" name="photo">
+
+    <!-- সাবজেক্ট/চিঠির অংশ -->
+    <div class="subject">
+      বরাবর,<br>
+      পরিচালক,<br>
+      রহনপুর কুরআনের আলো<br>
+      রহনপুর, গোমস্তাপুর, চাঁপাইনবাবগঞ্জ।<br><br>
+
+      জনাব,<br>
+      বিনীত নিবেদন এই যে, আমি রহনপুর কুরআনের আলো প্রতিযোগিতায় অংশগ্রহণের জন্য আইন অনুযায়ী প্রকাশ করার নিমিত্তে আমার ব্যক্তিগত তথ্যাদি পেশ করলামঃ
+    </div>
+
+    <!-- ফর্ম -->
+    <div class="form-group">
+      <label>১। নাম :</label>
+      <input type="text" name="name" required>
+    </div>
+    <div class="form-group">
+      <label>২। পিতার নাম :</label>
+      <input type="text" name="father" required>
+    </div>
+    <div class="form-group">
+      <label>৩। মাতার নাম :</label>
+      <input type="text" name="mother" required>
+    </div>
+    <div class="form-group">
+      <label>৪। স্থায়ী ঠিকানা :</label>
+      <input type="text" name="address" required>
+    </div>
+    <div class="form-group">
+      <label>৫। মাদরাসার ঠিকানা :</label>
+      <input type="text" name="madrasah" required>
+    </div>
+    <div class="form-group">
+      <label>৬। মুহ্তামিম এর মোবাইল নং :</label>
+      <input type="text" name="mobile" required>
+    </div>
+    <div class="form-group">
+      <label>৭। কত পারা মুখস্থ :</label>
+      <input type="text" name="quran" required>
+    </div>
+
+    <!-- স্বাক্ষর -->
+    <div class="signature-wrapper">
+      <div class="signature-box">
+        <canvas id="applicant-signature" width="250" height="60"></canvas>
+        <div class="signature-label">আবেদনকারীর স্বাক্ষর</div>
+        <button type="button" id="clear-applicant">Clear</button>
+      </div>
+
+      <div class="signature-box">
+        <canvas id="teacher-signature" width="250" height="60"></canvas>
+        <div class="signature-label">মাদরাসা প্রধানের স্বাক্ষর</div>
+        <button type="button" id="clear-teacher">Clear</button>
+      </div>
+    </div>
+
+    <!-- একটাই সাবমিট বাটন -->
+    <div class="buttons">
+      <button type="submit">Submit</button>
+    </div>
+  </form>
+
+  <script>
+    // ছবি আপলোড প্রিভিউ
+    document.getElementById('photo-upload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = document.getElementById('photo-preview');
+          img.src = event.target.result;
+          img.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // স্বাক্ষর ফাংশন
+    function initSignature(canvasId, clearBtnId) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      let drawing = false;
+
+      canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
+      canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+      canvas.addEventListener('mouseout', () => { drawing = false; ctx.beginPath(); });
+      canvas.addEventListener('mousemove', draw);
+
+      function draw(e) {
+        if (!drawing) return;
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#000";
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+      }
+
+      document.getElementById(clearBtnId).addEventListener("click", () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      });
+    }
+
+    initSignature("applicant-signature", "clear-applicant");
+    initSignature("teacher-signature", "clear-teacher");
+
+    // সাবমিট হ্যান্ডলার (fetch দিয়ে Google Apps Script এ পাঠানো)
+    document.getElementById("applicationForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const scriptURL = "YOUR_WEB_APP_URL"; // এখানে আপনার Apps Script Web App URL দিন
+
+      fetch(scriptURL, {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "success") {
+          alert("✅ ফরম সফলভাবে জমা হয়েছে!");
+          window.open(data.pdfUrl, "_blank"); // PDF ডাউনলোড লিঙ্ক খুলবে
+        } else {
+          alert("⚠️ " + data.message);
+        }
+      })
+      .catch(err => {
+        alert("❌ সার্ভার এরর: " + err.message);
+      });
+    });
+  </script>
+</body>
+</html>

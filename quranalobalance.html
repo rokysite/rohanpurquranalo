@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ক্যাশিয়ার সিস্টেম</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta http-equiv="cache-control" content="max-age=0"/>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: #F8EDFA;
+}
+body {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 320px;
+}
+.container {
+  width: 95%;
+  max-width: 1200px;
+  margin: auto;
+  text-align: center;
+}
+button, input, select {
+  padding: 6px 10px;
+  margin: 3px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: center;
+}
+input, select {
+  width: 100%;
+  box-sizing: border-box;
+}
+table {
+  border-collapse: collapse;
+  font-size: 13px;
+  width: 100%;
+}
+th, td {
+  border: 1px solid #555;
+  padding: 6px 10px;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 13px;
+}
+th {
+  background: #009688;
+  color: #fff;
+}
+.income {
+  color: green;
+  font-weight: bold;
+}
+.expense {
+  color: red;
+  font-weight: bold;
+}
+.balance-box {
+  margin: 15px 0;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+.balance-item {
+  flex: 1;
+  padding: 6px 5px;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 13px;
+  text-align:center;
+}
+.balance-income { background: #4caf50; }
+.balance-expense { background: #f44336; }
+.balance-balance { background: #2196f3; }
+#overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 50;
+}
+.popup {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border-radius: 10px;
+  padding: 15px;
+  z-index: 100;
+  width: 90%;
+  max-width: 450px;
+}
+.scrollable-table {
+  width: 100%;
+  overflow: auto;
+  max-height: 500px;
+  text-align: center;
+}
+.scrollable-table table {
+  border-collapse: collapse;
+  width: auto;
+  min-width: 0;
+  table-layout: auto;
+  margin: 0 auto;
+}
+.scrollable-table thead th {
+  position: sticky;
+  top: 0;
+  background: #009688;
+  color: #fff;
+  z-index: 10;
+}
+.filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  flex-wrap: auto;
+  margin: 10px 0;
+}
+.filter-row label, .filter-row input, .filter-row select, .filter-row button {
+  flex: 1;
+  min-width: 80px;
+}
+.filter-row button {
+  font-size: 13px;
+  padding: 6px 8px;
+}
+@media (max-width: 480px) {
+  .filter-row {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+  .balance-item {
+    font-size: 12px;
+  }
+}
+.edit-btn {
+  background:#ff9800;color:white;padding:3px 6px;border-radius:4px;font-size:12px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<button id="cashierBtn" style="background:#ff9800;color:#fff;">ক্যাশিয়ার</button>
+<div id="overlay"></div>
+
+<!-- Login Popup -->
+<div id="loginPopup" class="popup">
+  <h3> লগিন</h3>
+  <input type="text" id="loginUser" placeholder="ইউজার নাম">
+  <input type="password" id="loginPass" placeholder="পাসওয়ার্ড">
+  <button style="background:#4caf50;color:#fff;" onclick="loginUser()">লগইন</button>
+  <button style="background:#f44336;color:#fff;" onclick="closeLogin()">ক্যানসেল</button>
+
+</div>
+
+<!-- Type Select Popup -->
+<div id="typeSelectPopup" class="popup">
+  <h3>আপনি তথ্য টাইপ নির্বাচন করুন</h3>
+  <button style="background:green;color:white;" onclick="openForm('আয়')">আয়</button>
+  <button style="background:red;color:white;" onclick="openForm('ব্যয়')">ব্যয়</button>
+  <br><br>
+
+  <button style="background:#9e9e9e;color:white;" onclick="cancelTypeSelect()">ক্যানসেল</button>
+  </div>
+
+<!-- Data Form -->
+<div id="dataForm" class="popup">
+  <h3 id="formTitle"></h3>
+  <input type="date" id="date">
+  <input id="payer" placeholder="প্রদানকারী">
+  <select id="method" onchange="checkOtherMethod()">
+    <option value="">মাধ্যম নির্বাচন করুন</option>
+    <option value="বাই হ্যন্ড">বাই হ্যান্ড</option>
+    <option value="ক্যাশ মেমো">ক্যাশ মেমো</option>
+    <option value="ব্যাংক">ব্যাংক</option>
+    <option value="বিকাশ">বিকাশ</option>
+    <option value="মোবাইল বাংকিং">মোবাইল বাংকিং</option>
+    <option value="অন্যান্য">অন্যান্য</option>
+  </select>
+  <input id="methodOther" placeholder="মাধ্যম লিখুন (যদি অন্যান্য হয়)" style="display:none; margin-top:5px;">
+  <input id="receiver" placeholder="গ্রহণকারী">
+  <input id="description" placeholder="বিবরণ">
+  <input id="amount" type="number" placeholder="পরিমাণ" oninput="calculateTotal()">
+  <input id="rate" type="number" placeholder="দর" oninput="calculateTotal()">
+  <input id="total" readonly placeholder="মোট টাকা">
+  <input id="type" readonly>
+  <div style="display:flex;justify-content:center;gap:10px;">
+    <button style="background:#4caf50;color:#fff;" onclick="saveData()">সেভ</button>
+    <button style="background:#f44336;color:#fff;" onclick="closeDataForm()">ক্যানসেল</button>
+  </div>
+</div>
+
+<div class="balance-box">
+  <div class="balance-item balance-income">মোট আয়<br><span id="totalIncome">0</span></div>
+  <div class="balance-item balance-expense">মোট ব্যয়<br><span id="totalExpense">0</span></div>
+  <div class="balance-item balance-balance">বর্তমান ব্যালেন্স<br><span id="balance">0</span></div>
+</div>
+
+<div class="filter-row">
+  <input type="date" id="startDate" placeholder="তারিখ থেকে">
+  <input type="date" id="endDate" placeholder="তারিখ পর্যন্ত">
+  <select id="month">
+    <option value="">মাস</option>
+    <option value="1">জানুয়ারি</option>
+    <option value="2">ফেব্রুয়ারি</option>
+    <option value="3">মার্চ</option>
+    <option value="4">এপ্রিল</option>
+    <option value="5">মে</option>
+    <option value="6">জুন</option>
+    <option value="7">জুলাই</option>
+    <option value="8">আগস্ট</option>
+    <option value="9">সেপ্টেম্বর</option>
+    <option value="10">অক্টোবর</option>
+    <option value="11">নভেম্বর</option>
+    <option value="12">ডিসেম্বর</option>
+  </select>
+  <input type="number" id="year" placeholder="বছর">
+  <button style="background:#2196f3;color:white;" onclick="filterTable()">সার্চ</button>
+  <button style="background:#9e9e9e;color:white;" onclick="loadTable()">রিসেট</button>
+</div>
+
+<div> <h2 style="text-align:center;">রহনপুর কোরআনের আলো আয় ও ব্যয়ের তালিকাঃ </h2></div>
+
+<div class="scrollable-table">
+<table id="dataTable">
+<thead>
+<tr>
+<th>তারিখ</th>
+<th>প্রদানকারী</th>
+<th>মাধ্যম</th>
+<th>গ্রহণকারী</th>
+<th>বিবরণ</th>
+<th>পরিমাণ</th>
+<th>দর</th>
+<th>মোট</th>
+<th>ধরণ</th>
+<th>ইউজার</th>
+<th id="editHeader">Edit</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+<div style="margin:10px 0;">
+  <button style="background:#2196f3;color:white;" onclick="printTable()">টেবিল প্রিন্ট</button>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzEiu36jUYklAgZgSrICs0rQ-SRGT4MaCGsMkpNnDzpTHTw3Ab0FBtE6H3lkX0HT7ZY/exec";
+let currentUser="", currentRole="user";
+const overlay = document.getElementById("overlay");
+const loginPopup = document.getElementById("loginPopup");
+const typeSelectPopup = document.getElementById("typeSelectPopup");
+const dataForm = document.getElementById("dataForm");
+const dataTable = document.getElementById("dataTable");
+
+document.getElementById("cashierBtn").onclick = ()=>{ overlay.style.display="block"; loginPopup.style.display="block"; };
+function closeLogin(){ overlay.style.display="none"; loginPopup.style.display="none"; }
+function closeTypeSelect(){ overlay.style.display="none"; typeSelectPopup.style.display="none"; }
+function closeForm(){ overlay.style.display="none"; dataForm.style.display="none"; }
+function openForm(t){ closeTypeSelect(); dataForm.style.display="block"; document.getElementById("formTitle").innerText = t + " ফরম"; document.getElementById("type").value = t; clearFormInputs(); }
+function clearFormInputs(){ document.getElementById("date").value=""; document.getElementById("payer").value=""; document.getElementById("method").value=""; document.getElementById("methodOther").value=""; document.getElementById("methodOther").style.display="none"; document.getElementById("receiver").value=""; document.getElementById("description").value=""; document.getElementById("amount").value=""; document.getElementById("rate").value=""; document.getElementById("total").value=""; }
+function closeDataForm(){ clearFormInputs(); closeForm(); }
+function calculateTotal(){ const amount = Number(document.getElementById("amount").value)||0; const rate = Number(document.getElementById("rate").value)||0; document.getElementById("total").value = amount * rate; }
+
+function cancelTypeSelect(){
+  typeSelectPopup.style.display = "none";
+  overlay.style.display = "none";
+}
+
+
+async function loginUser(){
+  const username = document.getElementById("loginUser").value;
+  const password = document.getElementById("loginPass").value;
+  const res = await fetch(API_URL,{method:'POST', body: JSON.stringify({action:'login', username, password})});
+  const data = await res.json();
+  if(data.status){
+    currentUser = data.username;
+    currentRole = data.role || "user"; 
+    closeLogin();
+    overlay.style.display="block";
+    typeSelectPopup.style.display="block";
+    loadTable();
+  } else { alert(data.message); }
+}
+
+function checkOtherMethod(){ const sel = document.getElementById("method"); const other = document.getElementById("methodOther"); if(sel.value==="অন্যান্য"){ other.style.display="block"; } else { other.style.display="none"; other.value=""; } }
+
+async function saveData(){
+  const date = document.getElementById("date").value;
+  const payer = document.getElementById("payer").value;
+  let method = document.getElementById("method").value;
+  const methodOther = document.getElementById("methodOther").value;
+  if(method === "অন্যান্য") method = methodOther.trim();
+  const receiver = document.getElementById("receiver").value;
+  const description = document.getElementById("description").value;
+  const amount = document.getElementById("amount").value;
+  const rate = document.getElementById("rate").value;
+  const total = document.getElementById("total").value;
+  const type = document.getElementById("type").value;
+  if(!date || !payer || !method || !receiver || !amount || !rate || !total){ alert("ফর্মের সকল তথ্য পূর্ণ করুন!"); return; }
+  const data = { date, payer, method, receiver, description, amount, rate, total, type, user: currentUser };
+  await fetch(API_URL,{method:'POST', body: JSON.stringify({action:'saveData', data})});
+  clearFormInputs();
+  loadTable();
+}
+
+function normalizeDate(d){ const dt=new Date(d); dt.setHours(0,0,0,0); return dt; }
+
+function updateTableAndBalance(rows){
+  const tbody = dataTable.querySelector("tbody");
+  tbody.innerHTML = "";
+  let totalIncome=0, totalExpense=0;
+  rows.forEach(d=>{
+    const type = (d.type||"").toString().trim();
+    const totalVal = Number(d.total) || (Number(d.amount)*Number(d.rate)) || 0;
+    if(type==="আয়") totalIncome += totalVal;
+    else if(type==="ব্যয়") totalExpense += totalVal;
+    const typeClass = (type==="আয়")?"income":(type==="ব্যয়")?"expense":"";
+    let editBtn = "";
+    if(currentRole==="admin") editBtn = `<button class="edit-btn" onclick="editRow('${d.id}')">Edit</button>`;
+    tbody.innerHTML += `<tr>
+      <td>${new Date(d.date).toLocaleDateString()}</td>
+      <td>${d.payer}</td>
+      <td>${d.method||""}</td>
+      <td>${d.receiver}</td>
+      <td>${d.description||""}</td>
+      <td>${d.amount}</td>
+      <td>${d.rate}</td>
+      <td>${totalVal}</td>
+      <td class="${typeClass}">${type}</td>
+      <td>${d.user||""}</td>
+      <td>${editBtn}</td>
+    </tr>`;
+  });
+  document.getElementById("totalIncome").innerText=totalIncome;
+  document.getElementById("totalExpense").innerText=totalExpense;
+  document.getElementById("balance").innerText=totalIncome-totalExpense;
+  document.getElementById("editHeader").style.display = (currentRole==="admin")?"":"none";
+}
+async function loadTable(){ const res = await fetch(API_URL,{method:'POST', body: JSON.stringify({action:'getAllData'})}); const data = await res.json(); updateTableAndBalance(data); }
+
+async function filterTable(){
+  const sVal=document.getElementById("startDate").value;
+  const eVal=document.getElementById("endDate").value;
+  const monthVal=Number(document.getElementById("month").value);
+  const yearVal=Number(document.getElementById("year").value);
+  const s = sVal?normalizeDate(sVal):null;
+  const e = eVal?normalizeDate(eVal):null;
+  const res=await fetch(API_URL,{method:'POST', body: JSON.stringify({action:'getAllData'})});
+  const data = await res.json();
+  const filtered = data.filter(d=>{
+    const dt = new Date(d.date);
+    const dtNorm = normalizeDate(d.date);
+    let pass=true;
+    if(s && dtNorm<s) pass=false;
+    if(e && dtNorm>e) pass=false;
+    if(monthVal && (dt.getMonth()+1)!==monthVal) pass=false;
+    if(yearVal && dt.getFullYear()!==yearVal) pass=false;
+    return pass;
+  });
+  updateTableAndBalance(filtered);
+}
+
+document.getElementById("startDate").addEventListener("input",filterTable);
+document.getElementById("endDate").addEventListener("input",filterTable);
+document.getElementById("month").addEventListener("change",filterTable);
+document.getElementById("year").addEventListener("input",filterTable);
+
+function editRow(id){
+  alert("এডিট ফাংশন এখানে লাগানো হবে। ID: "+id);
+}
+
+function printTable(){
+  const printContent=document.querySelector('.scrollable-table').outerHTML;
+  const balanceContent=document.querySelector('.balance-box').outerHTML;
+  const title="<h2 style='text-align:center;'>রহনপুর কোরআনের আলো আয় ও ব্যয়ের তালিকাঃ</h2>";
+  const newWin=window.open('','', 'width=900,height=600');
+  newWin.document.write('<html><head><title>প্রিন্ট</title>');
+  newWin.document.write('<style>table{border-collapse:collapse;width:auto;table-layout:auto;margin:0 auto;} th,td{border:1px solid #555;padding:6px 10px;text-align:center;white-space:nowrap;} th{background:#009688;color:#fff;} .income{color:green;font-weight:bold;} .expense{color:red;font-weight:bold;} .balance-box{display:flex;justify-content:center;gap:10px;margin:10px 0;} .balance-item{flex:none;padding:6px 10px;color:#fff;border-radius:5px;font-size:13px;text-align:center;} .balance-income{background:#4caf50;} .balance-expense{background:#f44336;} .balance-balance{background:#2196f3;} #dataTable th:last-child,#dataTable td:last-child{display:none;}</style>');
+  newWin.document.write('</head><body>');
+  newWin.document.write(title);
+  newWin.document.write(balanceContent);
+  newWin.document.write(printContent);
+  newWin.document.write('</body></html>');
+  newWin.document.close();
+  newWin.print();
+}
+
+loadTable();
+</script>
+</body>
+</html>

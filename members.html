@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Member System</title>
+
+<style>
+body{font-family:sans-serif;background:#f0f4c3;margin:0;text-align:center;}
+.box{max-width:900px;margin:20px auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+input,textarea,button,select{
+  width:90%;padding:10px;margin:5px auto;
+  display:block;border-radius:6px;border:1px solid #ccc;text-align:center;
+}
+button{background:#2e7d32;color:#fff;border:none;border-radius:6px;cursor:pointer;}
+button.cancel{background:#888;}
+button.logout{background:#c62828;}
+button.print{background:#1565c0;}
+table{width:90%;margin:10px auto;border-collapse:collapse;}
+th,td{text-align:center;padding:8px;border:1px solid #ccc;}
+th{background:#c8e6c9;}
+tr:hover{background:#e8f5e9;cursor:pointer}
+
+/* Popup */
+.popup{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  align-items:flex-start;
+  justify-content:center;
+  padding-top:20px;
+  overflow-y:auto;
+}
+.popup-box{
+  background:#fff;
+  padding:20px;
+  width:95%;
+  max-width:500px;
+  border-radius:10px;
+  max-height:90vh;
+  overflow-y:auto;
+}
+.search-row{
+  display:flex;
+  gap:8px;
+  justify-content:center;
+}
+.search-row input{flex:1;}
+.search-row button{width:auto;padding:8px 12px;}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<button onclick="openLoginPopup()">নতুন ডাটা এন্ট্রি</button>
+</div>
+
+<!-- Members Table -->
+<div class="box" id="memberBox">
+<h2>📋 সদস্য তালিকাঃ</h2>
+
+<div class="search-row">
+  <input id="searchText" placeholder="নাম লিখে সার্চ">
+  <button onclick="searchTable()">Search</button>
+  <button class="cancel" onclick="clearSearch()">Cancel</button>
+  <button class="print" onclick="printTable()">Print</button>
+</div>
+
+<table id="memberTable">
+<thead>
+<tr>
+<th>নাম</th>
+<th>ঠিকানা</th>
+<th>মোবাইল</th>
+<th>পদবী</th>
+</tr>
+</thead>
+<tbody id="list"></tbody>
+</table>
+</div>
+
+<!-- Popup -->
+<div id="popup" class="popup">
+<div class="popup-box">
+
+<!-- Login -->
+<div id="loginSection">
+<h3>লগিন করুন</h3>
+<input id="user" placeholder="Username">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<button class="cancel" onclick="closePopup()">Cancel</button>
+</div>
+
+<!-- Entry -->
+<div id="entrySection" style="display:none;">
+<h3>সদস্য এন্ট্রি / আপডেট</h3>
+
+<div class="search-row">
+<input id="pSearch" placeholder="নাম লিখে সার্চ">
+<button onclick="popupSearch()">Search</button>
+</div>
+
+<table id="popupTable" style="display:none;">
+<thead>
+<tr><th>নাম</th><th>মোবাইল</th><th>পদবী</th></tr>
+</thead>
+<tbody id="popupList"></tbody>
+</table>
+
+<hr>
+
+<input id="memberName" placeholder="নাম">
+<textarea id="address" placeholder="ঠিকানা"></textarea>
+<input id="mobile" placeholder="মোবাইল (0 সহ)">
+<input id="position" placeholder="পদবী">
+
+<button onclick="saveMember()">Save</button>
+<button class="logout" onclick="logout()">Logout</button>
+</div>
+
+</div>
+</div>
+
+<script>
+const API="https://script.google.com/macros/s/AKfycbwE1l3-nU-mop_GKX3ChdtSmfJYPQNsHRBZdcyUhaRhynsWd7yNyUaXhGjc7zDzlVjd/exec";
+const KEY="MYSECRET2025KEY";
+
+let loggedIn=false;
+let popupData=[];
+let memberList=[];
+
+/* Load members */
+function load(){
+ fetch(API,{method:"POST",body:JSON.stringify({action:"getPublic"})})
+ .then(r=>r.json()).then(d=>{
+   memberList=d; // Save for duplicate check
+   list.innerHTML=d.map(r=>`
+     <tr>
+       <td>${r[0]}</td>
+       <td>${r[1]}</td>
+       <td>${r[2]}</td>
+       <td>${r[3]}</td>
+     </tr>`).join("");
+ });
+}
+load();
+
+/* Table search */
+function searchTable(){
+ const q=searchText.value.toLowerCase();
+ [...list.rows].forEach(r=>{
+   r.style.display=r.innerText.toLowerCase().includes(q)?"":"none";
+ });
+}
+
+/* Clear search */
+function clearSearch(){
+ searchText.value="";
+ [...list.rows].forEach(r=>r.style.display="");
+}
+
+/* Print only member table */
+function printTable(){
+ const printContent=document.getElementById("memberBox").innerHTML;
+ const win=window.open("","","width=900,height=650");
+ win.document.write(`
+   <html>
+   <head>
+     <title>সদস্য তালিকা</title>
+     <style>
+       body{font-family:sans-serif;text-align:center}
+       table{width:100%;border-collapse:collapse}
+       th,td{border:1px solid #000;padding:6px}
+       th{background:#eee}
+     </style>
+   </head>
+   <body>
+     ${printContent}
+   </body>
+   </html>
+ `);
+ win.document.close();
+ win.focus();
+ win.print();
+ win.close();
+}
+
+/* Popup control */
+function openLoginPopup(){
+ popup.style.display="flex";
+ loginSection.style.display="block";
+ entrySection.style.display="none";
+}
+function closePopup(){popup.style.display="none";}
+
+/* Login */
+function login(){
+ fetch(API,{
+   method:"POST",
+   body:JSON.stringify({action:"login",key:KEY,user:user.value,pass:pass.value})
+ }).then(r=>r.json()).then(r=>{
+   if(r.status==="ok"){
+     loggedIn=true;
+     loginSection.style.display="none";
+     entrySection.style.display="block";
+   }else alert("Login Failed");
+ });
+}
+
+/* Popup search */
+function popupSearch(){
+ if(!loggedIn)return alert("লগিন করুন");
+ const q=pSearch.value.trim();
+ if(!q)return alert("নাম লিখুন");
+
+ fetch(API,{
+   method:"POST",
+   body:JSON.stringify({action:"searchByName",key:KEY,q:q})
+ }).then(r=>r.json()).then(d=>{
+   popupData=d;
+   if(d.length===0){
+     popupTable.style.display="none";
+     alert("কিছু পাওয়া যায়নি");
+     return;
+   }
+   popupTable.style.display="table";
+   popupList.innerHTML=d.map((r,i)=>`
+     <tr onclick="selectPopup(${i})">
+       <td>${r[0]}</td>
+       <td>${r[2]}</td>
+       <td>${r[3]}</td>
+     </tr>
+   `).join("");
+ });
+}
+
+/* Select popup row */
+function selectPopup(i){
+ const r=popupData[i];
+ memberName.value=r[0];
+ address.value=r[1];
+ mobile.value=r[2];
+ position.value=r[3];
+}
+
+/* Save */
+function saveMember(){
+ const name=memberName.value.trim();
+ const addr=address.value.trim();
+ const mob=mobile.value.trim();
+ const pos=position.value.trim();
+
+ if(!name || !mob){ return alert("নাম ও মোবাইল অবশ্যই দিতে হবে"); }
+
+ // Duplicate check
+ const duplicate=memberList.some(r=>r[2]===mob);
+ if(duplicate){ return alert("এই মোবাইল নম্বর ইতিমধ্যেই আছে"); }
+
+ fetch(API,{
+   method:"POST",
+   body:JSON.stringify({
+     action:"save",
+     key:KEY,
+     name:name,
+     address:addr,
+     mobile:mob,
+     position:pos
+   })
+ }).then(r=>r.json()).then(()=>{
+   alert("Saved Successfully");
+   memberName.value="";
+   address.value="";
+   mobile.value="";
+   position.value="";
+   pSearch.value="";
+   popupTable.style.display="none";
+   load();
+ });
+}
+
+function logout(){
+ loggedIn=false;
+ entrySection.style.display="none";
+ loginSection.style.display="block";
+}
+</script>
+
+</body>
+</html>
