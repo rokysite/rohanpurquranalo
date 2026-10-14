@@ -52,25 +52,31 @@
       position: absolute;
       top: 20px;
       right: 20px;
-      width: 150px;
-      height: 170px;
+      width: 130px;
+      height: 155px;
       border: 2px solid #999;
       text-align: center;
       font-size: 14px;
       cursor: pointer;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #fff;
     }
     .photo-box img {
       width: 100%;
-      height: 130px;
-      object-fit: cover;
+      height: 125px;
+      object-fit: contain; /* ছবি কেটে না গিয়ে সম্পূর্ণ দেখানোর জন্য */
+      background: #f9f9f9;
       display: none;
     }
     .photo-box span {
       display: block;
       background: #f0f0f0;
-      padding: 5px;
+      padding: 4px;
       font-weight: bold;
+      font-size: 13px;
     }
     .form-group {
       margin: 15px 0;
@@ -163,10 +169,10 @@
       বরাবর,<br>
       পরিচালক,<br>
       রহনপুর কুরআনের আলো<br>
-      রহনপুর, গোমস্তাপুর, চাঁপাইনবাবগঞ্জ।<br><br>
+      রহনপুর, গোমস্তাপুর, চাঁপাইনবাবগঞ্জ。<br><br>
 
       জনাব,<br>
-      বিনীত নিবেদন এই যে, আমি রহনপুর কুরআনের আলো প্রতিযোগিতায় অংশগ্রহণের জন্য আইন অনুযায়ী প্রকাশ করার নিমিত্তে আমার ব্যক্তিগত তথ্যাদি পেশ করলামঃ
+      বিনীত নিবেদন এই যে, আমি রহনপুর কুরআনের আলো প্রতিযোগিতায় অংশগ্রহণের জন্য আইন অনুযায়ী প্রকাশ করার নিমিত্তে আমার ব্যক্তিগত তথ্যাদি পেশ করলামঃ
     </div>
 
     <!-- ফর্ম -->
@@ -183,7 +189,7 @@
       <input type="text" name="mother" required>
     </div>
     <div class="form-group">
-      <label>৪। স্থায়ী ঠিকানা :</label>
+      <label>৪। স্থায়ী ঠিকানা :</label>
       <input type="text" name="address" required>
     </div>
     <div class="form-group">
@@ -265,7 +271,7 @@
     initSignature("applicant-signature", "clear-applicant");
     initSignature("teacher-signature", "clear-teacher");
 
-    // সাবমিট হ্যান্ডলার (fetch দিয়ে Google Apps Script এ পাঠানো)
+    // সাবমিট হ্যান্ডলার (fetch দিয়ে Google Apps Script এ পাঠানো)
     document.getElementById("applicationForm").addEventListener("submit", function(e) {
       e.preventDefault();
 
@@ -281,7 +287,7 @@
       .then(res => res.json())
       .then(data => {
         if (data.status === "success") {
-          alert("✅ ফরম সফলভাবে জমা হয়েছে!");
+          alert("✅ ফরম সফলভাবে জমা হয়েছে!");
           window.open(data.pdfUrl, "_blank"); // PDF ডাউনলোড লিঙ্ক খুলবে
         } else {
           alert("⚠️ " + data.message);
